@@ -67,6 +67,10 @@ def load_hints():
         return {}
 
 
+_KEY = {'titulo': 'title', 'tipo': 'type', 'descricao': 'description',
+        'title': 'title', 'type': 'type', 'description': 'description'}
+
+
 def read_meta(path):
     m = {'title': path.stem, 'type': 'fix', 'description': '', 'id': '???'}
     try:
@@ -78,7 +82,7 @@ def read_meta(path):
                 if ':' not in s:
                     continue
                 k, _, v = s[2:].partition(':')
-                k = k.strip().lower()
+                k = _KEY.get(k.strip().lower(), k.strip().lower())
                 v = v.strip()
                 if k in m:
                     m[k] = v.lower() if k == 'type' else v
@@ -88,7 +92,7 @@ def read_meta(path):
 
 
 def discover():
-    root = BASE / 'exercises'
+    root = BASE / 'exercicios'
     cats = {}
     if not root.exists():
         return cats
