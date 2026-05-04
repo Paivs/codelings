@@ -18,8 +18,7 @@
 
 numeros = [3, 7, 2, 9, 1, 5, 8, 4, 6]
 
-# TAREFA: Use tres loops for separados para calcular 'soma', 'maior'
-# e a lista 'pares'. Nao use sum(), max() ou list comprehensions.
+# TAREFA: Calcule 'soma', 'maior' e a lista 'pares' usando loops for.
 
 
 # =================================================================

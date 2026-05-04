@@ -22,8 +22,7 @@
 # =================================================================
 
 def pode_acessar(idade, tem_cadastro, esta_banido):
-    # TAREFA: Retorne True somente se todas as tres regras forem
-    # satisfeitas ao mesmo tempo. Use os operadores 'and' e 'not'.
+    # TAREFA: Implemente a funcao seguindo as tres regras de negocio.
     pass
 
 # =================================================================

@@ -15,11 +15,7 @@
 #   99    ->  "99"    (str)
 # =================================================================
 
-# TAREFA: Crie as quatro variaveis abaixo aplicando a conversao correta.
-# numero_inteiro -> converta a string "42" para int
-# numero_float   -> converta o inteiro 7 para float
-# valor_falso    -> converta o inteiro 0 para bool
-# numero_texto   -> converta o inteiro 99 para str
+# TAREFA: Crie as quatro variaveis abaixo com as conversoes corretas.
 
 
 # =================================================================

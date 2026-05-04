@@ -20,8 +20,7 @@
 
 numeros = [5, 2, 8, 1, 9, 3]
 
-# TAREFA: Execute as cinco operacoes acima sobre a lista 'numeros'
-# usando os metodos: append(), remove(), sort(), sum(), len().
+# TAREFA: Execute as cinco operacoes sobre a lista 'numeros'.
 
 
 # =================================================================

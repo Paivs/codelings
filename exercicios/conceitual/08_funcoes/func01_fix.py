@@ -5,11 +5,10 @@
 # =================================================================
 # ENUNCIADO
 # =================================================================
-# Uma funcao calcula a area de um retangulo, mas nao devolve
-# o resultado para quem a chamou. Por isso, 'resultado' recebe
-# None em vez do valor calculado.
+# A funcao calcula a area de um retangulo mas o valor calculado
+# nunca chega a quem chamou a funcao.
 #
-# Adicione o comando necessario para a funcao devolver o valor.
+# Corrija o codigo para que o resultado seja retornado corretamente.
 # =================================================================
 
 def area_retangulo(largura, altura):

@@ -19,8 +19,7 @@
 
 texto = "a raposa marrom pula sobre o cao preguicoso"
 
-# TAREFA: Crie as quatro variaveis acima aplicando as transformacoes
-# sobre 'texto'. Metodos uteis: .upper(), .split(), .replace().
+# TAREFA: Crie as quatro variaveis aplicando as transformacoes sobre 'texto'.
 
 
 # =================================================================

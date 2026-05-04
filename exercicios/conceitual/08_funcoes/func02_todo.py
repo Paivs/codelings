@@ -20,10 +20,6 @@
 # =================================================================
 
 # TAREFA: Implemente as quatro funcoes abaixo.
-# somar       -> retorna a + b
-# subtrair    -> retorna a - b
-# multiplicar -> retorna a * b
-# dividir     -> retorna a / b, ou None se b == 0
 
 def somar(a, b):
     pass
