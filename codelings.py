@@ -390,11 +390,15 @@ def header(prog, cats):
     print(BANNER)
     total  = sum(len(v) for p in cats.values() for v in p.values())
     done   = sum(1 for v in prog.values() if v)
-    pct    = done / max(total, 1)
-    score  = done * 10
-    n      = int(40 * pct)
-    bar    = G + '#' * n + DIM + '-' * (40 - n) + RST
-    medalha = _medalha(pct)
+    pct        = done / max(total, 1)
+    prob_total = sum(len(v) for v in cats.get('problemas', {}).values())
+    prob_done  = sum(1 for t in cats.get('problemas', {}).values()
+                     for e in t if prog.get(e['key']))
+    prob_pct   = prob_done / max(prob_total, 1)
+    score      = prob_done * 10
+    n          = int(40 * pct)
+    bar        = G + '#' * n + DIM + '-' * (40 - n) + RST
+    medalha    = _medalha(prob_pct)
     print(f"  Progresso: [{bar}] {BOLD}{done}/{total}{RST}  {medalha}  {CY}{BOLD}{score} pts{RST}\n")
 
 
