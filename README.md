@@ -1,5 +1,8 @@
 # Codelings
 
+<img width="610" height="343" alt="image" src="https://github.com/user-attachments/assets/6ac6b1ae-d02e-4061-9f48-47c16883f188" />
+
+
 Aprenda programação corrigindo erros e completando trechos de código — inspirado no [Rustlings](https://github.com/rust-lang/rustlings).
 
 Funciona com qualquer linguagem: basta ter o runtime instalado.
