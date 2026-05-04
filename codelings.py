@@ -21,10 +21,12 @@ RUNNERS = {
     ".go":  {"cmd":     ["go",       "run", "{file}"]},
     ".rb":  {"cmd":     ["ruby",     "{file}"]},
     ".lua": {"cmd":     ["lua",      "{file}"]},
-    ".rs":  {"compile": ["rustc",    "{file}", "-o", "{bin}"],
-             "run":     ["{bin}"]},
-    ".c":   {"compile": ["gcc",      "{file}", "-o", "{bin}"],
-             "run":     ["{bin}"]},
+    ".rs":   {"compile": ["rustc",  "{file}", "-o", "{bin}"],
+              "run":     ["{bin}"]},
+    ".c":    {"compile": ["gcc",    "{file}", "-o", "{bin}"],
+              "run":     ["{bin}"]},
+    ".java": {"compile": ["javac",  "-d", "{tmpdir}", "{file}"],
+              "run":     ["java",   "-ea", "-cp", "{tmpdir}", "Exercicio"]},
 }
 
 DOC_PADRAO = {
@@ -35,7 +37,8 @@ DOC_PADRAO = {
     ".rs":  "https://doc.rust-lang.org/book/",
     ".rb":  "https://ruby-doc.org/",
     ".lua": "https://www.lua.org/manual/5.4/",
-    ".c":   "https://en.cppreference.com/w/c",
+    ".c":    "https://en.cppreference.com/w/c",
+    ".java": "https://dev.java/learn/",
 }
 
 LANG_LABEL = {
@@ -46,7 +49,8 @@ LANG_LABEL = {
     ".rb":  "Ruby",
     ".lua": "Lua",
     ".rs":  "Rust",
-    ".c":   "C",
+    ".c":    "C",
+    ".java": "Java",
 }
 
 # ── Compatibilidade de terminal (Windows / Linux / macOS) ─────────────────────
@@ -255,15 +259,17 @@ def run_ex(path):
     bin_name = path.stem + ('.exe' if sys.platform == 'win32' else '')
     with tempfile.TemporaryDirectory() as tmpdir:
         bin_path = Path(tmpdir) / bin_name
-        compile_cmd = [
-            c.replace('{file}', str(path)).replace('{bin}', str(bin_path))
-            for c in runner['compile']
-        ]
-        r = _run_cmd(compile_cmd, cwd=path.parent)
+
+        def expand(s):
+            return (s.replace('{file}',   str(path))
+                     .replace('{bin}',    str(bin_path))
+                     .replace('{tmpdir}', tmpdir)
+                     .replace('{class}',  path.stem))
+
+        r = _run_cmd([expand(c) for c in runner['compile']], cwd=path.parent)
         if r.returncode != 0:
             return r
-        run_cmd = [c.replace('{bin}', str(bin_path)) for c in runner['run']]
-        return _run_cmd(run_cmd, cwd=path.parent)
+        return _run_cmd([expand(c) for c in runner['run']], cwd=path.parent)
 
 
 def _parse_hint(raw) -> tuple[str, str]:

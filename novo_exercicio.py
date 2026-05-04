@@ -63,18 +63,20 @@ DOC_PADRAO: dict[str, str] = {
     ".rs":  "https://doc.rust-lang.org/book/",
     ".rb":  "https://ruby-doc.org/",
     ".lua": "https://www.lua.org/manual/5.4/",
-    ".c":   "https://en.cppreference.com/w/c",
+    ".c":    "https://en.cppreference.com/w/c",
+    ".java": "https://dev.java/learn/",
 }
 
 LINGUAGENS: dict[str, dict] = {
-    "Python":     {"ext": ".py",  "comment": "#",  "compiled": False},
-    "JavaScript": {"ext": ".js",  "comment": "//", "compiled": False},
-    "TypeScript": {"ext": ".ts",  "comment": "//", "compiled": False},
-    "Go":         {"ext": ".go",  "comment": "//", "compiled": False},
-    "Rust":       {"ext": ".rs",  "comment": "//", "compiled": True},
-    "Ruby":       {"ext": ".rb",  "comment": "#",  "compiled": False},
-    "Lua":        {"ext": ".lua", "comment": "--", "compiled": False},
-    "C":          {"ext": ".c",   "comment": "//", "compiled": True},
+    "Python":     {"ext": ".py",   "comment": "#",  "compiled": False},
+    "JavaScript": {"ext": ".js",   "comment": "//", "compiled": False},
+    "TypeScript": {"ext": ".ts",   "comment": "//", "compiled": False},
+    "Go":         {"ext": ".go",   "comment": "//", "compiled": False},
+    "Rust":       {"ext": ".rs",   "comment": "//", "compiled": True},
+    "Ruby":       {"ext": ".rb",   "comment": "#",  "compiled": False},
+    "Lua":        {"ext": ".lua",  "comment": "--", "compiled": False},
+    "C":          {"ext": ".c",    "comment": "//", "compiled": True},
+    "Java":       {"ext": ".java", "comment": "//", "compiled": True},
 }
 
 # Esqueleto de código de exemplo por extensão e tipo
@@ -111,6 +113,10 @@ _CORPO: dict[str, dict[str, str]] = {
         "fix":  '#include <stdio.h>\n#include <assert.h>\n\nint minhaFuncao(int x) {\n    return x + 1;  // <- revise esta linha\n}\n',
         "todo": '#include <stdio.h>\n#include <assert.h>\n\nint minhaFuncao(int x) {\n    // TAREFA: implemente aqui.\n    return 0;\n}\n',
     },
+    ".java": {
+        "fix":  'class Exercicio {\n\n    static int minhaFuncao(int x) {\n        return x + 1;  // <- revise esta linha\n    }\n',
+        "todo": 'class Exercicio {\n\n    static int minhaFuncao(int x) {\n        // TAREFA: implemente aqui.\n        return 0;\n    }\n',
+    },
 }
 
 _TESTES: dict[str, str] = {
@@ -121,7 +127,8 @@ _TESTES: dict[str, str] = {
     ".rs":  'fn main() {\n    assert_eq!(minha_funcao(1), 2, "caso 1 incorreto");\n    println!("Exercicio concluido!");\n}\n',
     ".rb":  'raise "caso 1 incorreto" unless minhaFuncao(1) == 2\nputs "Exercicio concluido!"\n',
     ".lua": 'assert(minhaFuncao(1) == 2, "caso 1 incorreto")\nprint("Exercicio concluido!")\n',
-    ".c":   'int main() {\n    assert(minhaFuncao(1) == 2);\n    printf("Exercicio concluido!\\n");\n    return 0;\n}\n',
+    ".c":    'int main() {\n    assert(minhaFuncao(1) == 2);\n    printf("Exercicio concluido!\\n");\n    return 0;\n}\n',
+    ".java": '    public static void main(String[] args) {\n        assert minhaFuncao(1) == 2 : "caso 1 incorreto";\n        System.out.println("Exercicio concluido!");\n    }\n}\n',
 }
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
