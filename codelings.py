@@ -27,6 +27,17 @@ RUNNERS = {
              "run":     ["{bin}"]},
 }
 
+DOC_PADRAO = {
+    ".py":  "https://docs.python.org/3/",
+    ".js":  "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript",
+    ".ts":  "https://www.typescriptlang.org/docs/",
+    ".go":  "https://go.dev/doc/",
+    ".rs":  "https://doc.rust-lang.org/book/",
+    ".rb":  "https://ruby-doc.org/",
+    ".lua": "https://www.lua.org/manual/5.4/",
+    ".c":   "https://en.cppreference.com/w/c",
+}
+
 LANG_LABEL = {
     ".py":  "Python",
     ".js":  "JavaScript",
@@ -271,6 +282,8 @@ def show_result(ex, result, prog, hints, show_hint=False):
     ok   = result.returncode == 0
 
     hint_text, hint_doc = _parse_hint(hints.get(ex['key'], ''))
+    if not hint_doc:
+        hint_doc = DOC_PADRAO.get(ex['path'].suffix.lower(), '')
     tem_hint = bool(hint_text or hint_doc)
 
     print(f"\n{SEP}")
