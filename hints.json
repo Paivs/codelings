@@ -16,18 +16,12 @@
   "exercicios/conceitual/07_loops/loop02_todo.py": "Inicialize as variaveis antes do loop. Para 'maior', comece com o primeiro elemento.",
   "exercicios/conceitual/08_funcoes/func01_fix.py": "Toda funcao que precisa devolver um valor precisa da instrucao 'return'.",
   "exercicios/conceitual/08_funcoes/func02_todo.py": "Cada funcao recebe dois parametros e deve retornar o resultado da operacao.",
-  "exercicios/problemas/01_palindromo/palindrome_fix.py": "Para inverter uma string em Python use fatiamento: texto[::-1]",
   "exercicios/problemas/01_palindromo/palindrome_todo.py": "Remova espacos e converta para minusculo antes de comparar. Use [::-1] para inverter.",
-  "exercicios/problemas/02_anagrama/anagrama_fix.py": "Normalize as strings antes de ordenar: .lower().replace(' ', '')",
   "exercicios/problemas/02_anagrama/anagrama_todo.py": "Normalize (minusculo, sem espacos) e compare sorted(a) == sorted(b).",
-  "exercicios/problemas/03_prefixo_comum/prefixo_fix.py": "Para encurtar o prefixo, remova o ultimo caractere: prefix[:-1], nao o primeiro.",
   "exercicios/problemas/03_prefixo_comum/prefixo_todo.py": "Para cada posicao i da primeira string, verifique se todas as outras strings tem o mesmo caractere nessa posicao.",
-  "exercicios/problemas/04_two_sum/two_sum_fix.py": "O complemento de n para atingir o alvo e target - n, nao target + n.",
   "exercicios/problemas/04_two_sum/two_sum_todo.py": "Para cada nums[i], o complemento necessario e target - nums[i]. Se ja foi visto, encontrou o par!",
-  "exercicios/problemas/05_mover_zeros/mover_zeros_fix.py": "O preenchimento ao final deve ser com zeros ([0]), nao com uns ([1]).",
   "exercicios/problemas/05_mover_zeros/mover_zeros_todo.py": "Separe os elementos nao-zero em uma lista e concatene os zeros no final.",
-  "exercicios/problemas/06_fizzbuzz/fizzbuzz_fix.py": "Multiplos de 3 devem retornar 'Fizz', nao 'Bizz'. Cheque o texto retornado.",
   "exercicios/problemas/06_fizzbuzz/fizzbuzz_todo.py": "Use o operador % (modulo). Verifique primeiro o caso FizzBuzz (divisivel por 3 E por 5).",
-  "exercicios/problemas/07_fibonacci/fibonacci_fix.py": "Partindo de [0, 1], precisamos de n-2 iteracoes para chegar a n termos no total.",
-  "exercicios/problemas/07_fibonacci/fibonacci_todo.py": "Comece com [0, 1] e acrescente seq[-1] + seq[-2] ate ter n termos. Trate n=0 e n=1 separadamente."
+  "exercicios/problemas/07_fibonacci/fibonacci_todo.py": "Comece com [0, 1] e acrescente seq[-1] + seq[-2] ate ter n termos. Trate n=0 e n=1 separadamente.",
+  "exercicios/conceitual/09_Classes/Classe_fix.py": "Sem Dica"
 }

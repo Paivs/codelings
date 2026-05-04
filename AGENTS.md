@@ -1,4 +1,4 @@
-# Guia de Criacao de Exercicios — Pythonlings
+# Guia de Criacao de Exercicios — Codelings
 
 Este documento define as convencoes obrigatorias para criar e manter exercicios.
 Qualquer agente ou colaborador deve segui-lo antes de escrever ou revisar um exercicio.
@@ -34,22 +34,31 @@ Sempre use `exercicios/` (portugues). Nunca `exercises/`.
 
 ## Nomenclatura de arquivos
 
-| Tipo      | Padrao             | Exemplo               |
-|-----------|--------------------|-----------------------|
-| FIX       | `nome_fix.py`      | `palindrome_fix.py`   |
-| TODO      | `nome_todo.py`     | `two_sum_todo.py`     |
-| Topico    | `NN_nome/`         | `01_palindromo/`      |
+| Tipo      | Padrao                  | Exemplo               |
+|-----------|-------------------------|-----------------------|
+| FIX       | `nome_fix.<ext>`        | `palindrome_fix.py`   |
+| TODO      | `nome_todo.<ext>`       | `two_sum_todo.js`     |
+| Topico    | `NN_nome/`              | `01_palindromo/`      |
+
+`<ext>` e a extensao da linguagem do exercicio (`.py`, `.js`, `.go`, `.rs`, etc.).
 
 ---
 
 ## Cabecalho obrigatorio
 
-Todo exercicio comeca com exatamente estas tres linhas:
+Todo exercicio comeca com exatamente estas tres linhas, usando o
+caractere de comentario da linguagem (`#`, `//` ou `--`):
 
 ```python
 # TITULO: Nome descritivo do exercicio
 # TIPO: fix        # ou: todo
 # ID: NNN          # numero unico sequencial de 3 digitos
+```
+
+```javascript
+// TITULO: Nome descritivo do exercicio
+// TIPO: todo
+// ID: NNN
 ```
 
 Termos em portugues: `TITULO`, `TIPO`. Nunca `TITLE`, `TYPE`.

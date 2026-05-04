@@ -1,20 +1,35 @@
-# Pythonlings
+# Codelings
 
-Aprenda Python corrigindo erros e completando trechos de código — inspirado no [Rustlings](https://github.com/rust-lang/rustlings).
+Aprenda programação corrigindo erros e completando trechos de código — inspirado no [Rustlings](https://github.com/rust-lang/rustlings).
+
+Funciona com qualquer linguagem: basta ter o runtime instalado.
+
+## Linguagens suportadas
+
+| Linguagem  | Extensão | Runtime necessário |
+|------------|----------|--------------------|
+| Python     | `.py`    | `python3`          |
+| JavaScript | `.js`    | `node`             |
+| TypeScript | `.ts`    | `deno`             |
+| Go         | `.go`    | `go`               |
+| Rust       | `.rs`    | `rustc`            |
+| Ruby       | `.rb`    | `ruby`             |
+| Lua        | `.lua`   | `lua`              |
+| C          | `.c`     | `gcc`              |
 
 ## Requisitos
 
-- Windows 11
-- Python 3.8 ou superior
-- Nenhuma dependência externa
+- Python 3.8 ou superior (apenas para rodar o motor)
+- O runtime da linguagem que você quer praticar
 
 ## Como iniciar
 
-Clique duas vezes em `start.bat`, ou execute no terminal:
+```bash
+python codelings.py
+```
 
-```
-python pythonlings.py
-```
+No Windows, clique duas vezes em `start.bat`.  
+No Linux/macOS, você pode usar `start.sh` ou executar diretamente.
 
 ## Como funciona
 
@@ -24,7 +39,8 @@ python pythonlings.py
 4. Salve o arquivo — o resultado aparece automaticamente na tela
 5. Interprete o erro, corrija o código, salve novamente
 6. Repita até o exercício passar
-7. `Ctrl+C` para voltar ao menu a qualquer momento
+7. `[H]` para exibir a dica quando houver erro
+8. `Ctrl+C` para voltar ao menu a qualquer momento
 
 O progresso é salvo automaticamente em `.progress.json`.
 
@@ -35,96 +51,81 @@ O progresso é salvo automaticamente em `.progress.json`.
 O arquivo já contém código com um bug intencional. O objetivo é encontrar e corrigir o erro.
 
 ```python
-# TITLE: Variaveis - Erro de Digitacao
-# TYPE: fix
-# DESCRIPTION: Ha um erro de digitacao no nome de uma variavel.
-# HINT: Python diferencia maiusculas de minusculas.
+# TITULO: Variaveis - Erro de Digitacao
+# TIPO: fix
+# ID: 001
 
-nome = "Ana"
-iddade = 22          # <- bug aqui
-
+nome   = "Ana"
+iddade = 22          # <- revise esta linha
 print(f"Idade: {idade}")
 ```
 
-O exercício é concluído quando o código roda sem erros.
-
 ### TODO
 
-O arquivo contém código parcialmente implementado com marcadores `# TODO:`. O objetivo é preencher os trechos que faltam.
+O arquivo contém código parcialmente implementado. O objetivo é preencher os trechos que faltam.
 
-```python
-# TITLE: Funcoes - Calculadora Simples
-# TYPE: todo
+```javascript
+// TITULO: Funcoes - Somar
+// TIPO: todo
+// ID: 042
 
-def somar(a, b):
-    # TODO: Retorne a soma de a e b
-    pass
+function somar(a, b) {
+    // TAREFA: implemente aqui.
+}
 ```
 
-Cada exercício TODO tem uma seção de validação ao final com `assert`s que verificam se a implementação está correta. O exercício é concluído quando todas as asserções passam.
-
-## Exercícios
-
-### Conceitual
-
-| Tópico        | FIX | TODO |
-|---------------|-----|------|
-| Variáveis     | 2   | 1    |
-| Tipos         | 1   | 1    |
-| Strings       | 1   | 1    |
-| Listas        | 1   | 1    |
-| Dicionários   | 1   | 1    |
-| Condicionais  | 1   | 1    |
-| Loops         | 1   | 1    |
-| Funções       | 1   | 1    |
-
-### Problemas
-
-| Tópico      | Exercícios                              |
-|-------------|-----------------------------------------|
-| Clássicos   | FizzBuzz, Fibonacci, Palíndromo (FIX)   |
-| Algoritmos  | Two Sum, Longest Common Prefix, Inverter Palavras (FIX) |
+Cada exercício TODO termina com uma seção de testes que verifica se a implementação está correta.
 
 ## Adicionando exercícios
 
-Crie um arquivo `.py` dentro de `exercises/<parte>/<topico>/` seguindo o formato de cabeçalho:
+Use o CLI interativo:
 
-```python
-# TITLE: Nome do Exercício
-# TYPE: fix        # ou: todo
-# DESCRIPTION: Uma linha descrevendo o que o aluno deve fazer.
-# HINT: Dica opcional exibida quando há erro.
-
-# ... código do exercício
+```bash
+python novo_exercicio.py
 ```
 
-Para exercícios **TODO**, termine o arquivo com uma seção de validação usando `assert`:
+O assistente guia você por linguagem, categoria, tipo, título e conteúdo — e abre o `$EDITOR` com o template já preenchido.
 
-```python
-# --- Validacao (nao modifique abaixo) ---
-assert resultado == esperado, f"Esperado {esperado}, obtido {resultado}"
-print("Exercicio concluido!")
+Ou crie manualmente um arquivo dentro de `exercicios/<categoria>/<topico>/` seguindo o formato de cabeçalho (comentário na sintaxe da linguagem):
+
+```
+TITULO: Nome do Exercício
+TIPO: fix   (ou: todo)
+ID: 042
 ```
 
-O sistema descobre exercícios automaticamente pela estrutura de pastas — não é necessário registrá-los em nenhum arquivo de configuração.
+O sistema descobre exercícios automaticamente pela estrutura de pastas.
 
 ## Estrutura de pastas
 
 ```
-pythonlings/
-├── pythonlings.py
-├── start.bat
-└── exercises/
+codelings/
+├── codelings.py          ← motor principal
+├── novo_exercicio.py     ← CLI para criar exercícios
+├── hints.json            ← dicas por arquivo
+└── exercicios/
     ├── conceitual/
     │   ├── 01_variaveis/
-    │   ├── 02_tipos/
-    │   ├── 03_strings/
-    │   ├── 04_listas/
-    │   ├── 05_dicionarios/
-    │   ├── 06_condicionais/
-    │   ├── 07_loops/
-    │   └── 08_funcoes/
+    │   │   ├── var01_fix.py
+    │   │   └── var02_todo.js
+    │   └── ...
     └── problemas/
-        ├── 01_classicos/
-        └── 02_algoritmos/
+        ├── 01_palindromo/
+        │   └── palindrome_todo.py
+        └── ...
 ```
+
+## Adicionando suporte a uma nova linguagem
+
+Adicione uma entrada em `RUNNERS` no `codelings.py`:
+
+```python
+# Linguagem interpretada
+".kt": {"cmd": ["kotlinc-jvm", "-script", "{file}"]},
+
+# Linguagem compilada
+".cpp": {"compile": ["g++", "{file}", "-o", "{bin}"],
+         "run":     ["{bin}"]},
+```
+
+E adicione o template correspondente em `novo_exercicio.py` nos dicionários `LINGUAGENS`, `_CORPO` e `_TESTES`.
