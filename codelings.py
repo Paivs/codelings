@@ -255,6 +255,13 @@ def run_ex(path):
         return _run_cmd(run_cmd, cwd=path.parent)
 
 
+def _parse_hint(raw) -> tuple[str, str]:
+    """Suporta formato string legado e dict {dica, doc}."""
+    if isinstance(raw, dict):
+        return raw.get('dica', ''), raw.get('doc', '')
+    return str(raw) if raw else '', ''
+
+
 def show_result(ex, result, prog, hints, show_hint=False):
     clr()
     m    = ex['meta']
@@ -262,7 +269,9 @@ def show_result(ex, result, prog, hints, show_hint=False):
     tc   = Y if m['type'] == 'fix' else B
     tl   = 'FIX' if m['type'] == 'fix' else 'TODO'
     ok   = result.returncode == 0
-    hint = hints.get(ex['key'], '')
+
+    hint_text, hint_doc = _parse_hint(hints.get(ex['key'], ''))
+    tem_hint = bool(hint_text or hint_doc)
 
     print(f"\n{SEP}")
     print(f"{BOLD}  #{m['id']}  {m['title']}{RST}")
@@ -290,12 +299,16 @@ def show_result(ex, result, prog, hints, show_hint=False):
             print(f"  {R}{line}{RST}")
         print()
 
-    if show_hint and hint:
-        print(f"  {Y}{BOLD}Dica:{RST} {Y}{hint}{RST}\n")
+    if show_hint and tem_hint:
+        if hint_text:
+            print(f"  {Y}{BOLD}Dica:{RST} {Y}{hint_text}{RST}")
+        if hint_doc:
+            print(f"  {Y}{BOLD}Doc: {RST} {CY}{hint_doc}{RST}")
+        print()
 
     print(f"\n{DIM}{'─' * 62}")
     print(f"  Arquivo : {ex['path']}")
-    if not ok and hint and not show_hint:
+    if not ok and tem_hint and not show_hint:
         print(f"  Teclas  : [H] mostrar dica   |   Ctrl+C voltar ao menu")
     else:
         print(f"  Teclas  : Ctrl+C voltar ao menu")

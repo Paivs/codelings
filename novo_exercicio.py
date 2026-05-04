@@ -55,6 +55,17 @@ def erro(text: str) -> None:
 
 # ── Linguagens suportadas ─────────────────────────────────────────────────────
 
+DOC_PADRAO: dict[str, str] = {
+    ".py":  "https://docs.python.org/3/",
+    ".js":  "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript",
+    ".ts":  "https://www.typescriptlang.org/docs/",
+    ".go":  "https://go.dev/doc/",
+    ".rs":  "https://doc.rust-lang.org/book/",
+    ".rb":  "https://ruby-doc.org/",
+    ".lua": "https://www.lua.org/manual/5.4/",
+    ".c":   "https://en.cppreference.com/w/c",
+}
+
 LINGUAGENS: dict[str, dict] = {
     "Python":     {"ext": ".py",  "comment": "#",  "compiled": False},
     "JavaScript": {"ext": ".js",  "comment": "//", "compiled": False},
@@ -304,18 +315,23 @@ def main() -> None:
     template = gerar_template(titulo, tipo, id_num, ext, comment)
     conteudo = abrir_editor(template)
 
-    # 9. Hint
-    step(9, "Dica (hint)")
-    hint = perguntar("Dica curta para o aluno (ou Enter para pular)", "")
+    # 9. Dica e documentação
+    step(9, "Dica e documentação")
+    hint_text = perguntar("Dica curta para o aluno (ou Enter para pular)", "")
+    doc_padrao = DOC_PADRAO.get(ext, "")
+    print(c(DIM, f"  Link padrão da linguagem: {doc_padrao}"))
+    doc_url = perguntar("Link da documentação (Enter para usar o padrão, '.' para omitir)", doc_padrao)
+    if doc_url == ".":
+        doc_url = ""
 
     # ── Salvar ────────────────────────────────────────────────────────────────
     dir_topico.mkdir(parents=True, exist_ok=True)
     destino.write_text(conteudo, encoding="utf-8")
 
     chave_hint = str(destino.relative_to(BASE)).replace("\\", "/")
-    if hint:
+    if hint_text or doc_url:
         hints = json.loads(HINTS_FILE.read_text(encoding="utf-8")) if HINTS_FILE.exists() else {}
-        hints[chave_hint] = hint
+        hints[chave_hint] = {"dica": hint_text, "doc": doc_url}
         HINTS_FILE.write_text(
             json.dumps(hints, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
@@ -323,7 +339,7 @@ def main() -> None:
 
     print()
     ok(f"Exercício criado: {c(BOLD, chave_hint)}")
-    if hint:
+    if hint_text or doc_url:
         ok("Hint salvo em hints.json")
     print()
     print(c(DIM, f"  Para iniciar: python codelings.py"))

@@ -23,5 +23,6 @@
   "exercicios/problemas/05_mover_zeros/mover_zeros_todo.py": "Separe os elementos nao-zero em uma lista e concatene os zeros no final.",
   "exercicios/problemas/06_fizzbuzz/fizzbuzz_todo.py": "Use o operador % (modulo). Verifique primeiro o caso FizzBuzz (divisivel por 3 E por 5).",
   "exercicios/problemas/07_fibonacci/fibonacci_todo.py": "Comece com [0, 1] e acrescente seq[-1] + seq[-2] ate ter n termos. Trate n=0 e n=1 separadamente.",
-  "exercicios/conceitual/09_Classes/Classe_fix.py": "Sem Dica"
+  "exercicios/conceitual/09_Classes/Classe_fix.py": "Sem Dica",
+  "exercicios/problemas/08_par_ou_impar/par_ou_impar_todo.py": "Não tem dica hahahaha"
 }
