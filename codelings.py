@@ -378,14 +378,24 @@ def label(name):
     return (name.split('_', 1)[1] if '_' in name else name).replace('_', ' ').title()
 
 
+def _medalha(pct: float) -> str:
+    if pct >= 1.0: return '🥇'
+    if pct >= 0.75: return '🥈'
+    if pct >= 0.5: return '🥉'
+    return '  '
+
+
 def header(prog, cats):
     clr()
     print(BANNER)
-    total = sum(len(v) for p in cats.values() for v in p.values())
-    done  = sum(1 for v in prog.values() if v)
-    n     = int(40 * done / max(total, 1))
-    bar   = G + '#' * n + DIM + '-' * (40 - n) + RST
-    print(f"  Progresso: [{bar}] {BOLD}{done}/{total}{RST}\n")
+    total  = sum(len(v) for p in cats.values() for v in p.values())
+    done   = sum(1 for v in prog.values() if v)
+    pct    = done / max(total, 1)
+    score  = done * 10
+    n      = int(40 * pct)
+    bar    = G + '#' * n + DIM + '-' * (40 - n) + RST
+    medalha = _medalha(pct)
+    print(f"  Progresso: [{bar}] {BOLD}{done}/{total}{RST}  {medalha}  {CY}{BOLD}{score} pts{RST}\n")
 
 
 def menu_parts(cats, prog, hints):
