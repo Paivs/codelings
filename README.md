@@ -16,6 +16,7 @@ Funciona com qualquer linguagem: basta ter o runtime instalado.
 | Ruby       | `.rb`    | `ruby`             |
 | Lua        | `.lua`   | `lua`              |
 | C          | `.c`     | `gcc`              |
+| Java       | `.java`  | `javac` + `java`   |
 
 ## Requisitos
 
@@ -123,9 +124,19 @@ Adicione uma entrada em `RUNNERS` no `codelings.py`:
 # Linguagem interpretada
 ".kt": {"cmd": ["kotlinc-jvm", "-script", "{file}"]},
 
-# Linguagem compilada
+# Linguagem compilada (usa {bin} para o executável)
 ".cpp": {"compile": ["g++", "{file}", "-o", "{bin}"],
          "run":     ["{bin}"]},
+
+# Linguagem compilada com diretório de saída (usa {tmpdir} e {class})
+".java": {"compile": ["javac", "-d", "{tmpdir}", "{file}"],
+          "run":     ["java", "-ea", "-cp", "{tmpdir}", "Exercicio"]},
 ```
 
-E adicione o template correspondente em `novo_exercicio.py` nos dicionários `LINGUAGENS`, `_CORPO` e `_TESTES`.
+E adicione o template correspondente em `novo_exercicio.py` nos dicionários `LINGUAGENS`, `DOC_PADRAO`, `_CORPO` e `_TESTES`.
+
+Veja [CONTRIBUTING.md](CONTRIBUTING.md) para o guia completo de contribuição.
+
+## Licença
+
+Distribuído sob a [GNU GPL v3](LICENSE).
