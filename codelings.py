@@ -14,8 +14,10 @@ BASE = Path(__file__).parent
 
 # ── Runners por extensão ───────────────────────────────────────────────────────
 
+_PY = "python" if sys.platform == "win32" else "python3"
+
 RUNNERS = {
-    ".py":  {"cmd":     ["python3",  "{file}"]},
+    ".py":  {"cmd":     [_PY,  "{file}"]},
     ".js":  {"cmd":     ["node",     "{file}"]},
     ".ts":  {"cmd":     ["deno",     "run", "--allow-all", "{file}"]},
     ".go":  {"cmd":     ["go",       "run", "{file}"]},
