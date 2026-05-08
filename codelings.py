@@ -8,7 +8,7 @@ import sys
 import time
 
 from runner import R, G, Y, B, CY, W, BOLD, DIM, RST
-from runner.i18n import t, get_banner, setup_i18n, _detect_lang
+from runner.i18n import t, get_banner, get_compact_banner, setup_i18n, _detect_lang
 from runner.runners import run_ex, discover, load_hints, load_progress, save_progress, DOC_PADRAO
 from runner.sync import sync_from_remote, _load_config, _save_config, _parse_github_url
 from runner.animations import play_random
@@ -188,9 +188,9 @@ def watch(ex, prog, hints):
         time.sleep(0.3)
 
 
-def header(prog, cats):
+def header(prog, cats, compact=False):
     clr()
-    print(get_banner())
+    print(get_compact_banner() if compact else get_banner())
     total      = sum(len(v) for p in cats.values() for v in p.values())
     done       = sum(1 for v in prog.values() if v)
     pct        = done / max(total, 1)
@@ -244,7 +244,7 @@ def menu_parts(cats, prog, hints):
 
 def menu_topics(cats, part, prog, hints):
     while True:
-        header(prog, cats)
+        header(prog, cats, compact=True)
         print(f"  {BOLD}{label(part)} — {t('menu.topics')}{RST}\n")
         topics = list(cats[part].keys())
         for i, topic in enumerate(topics, 1):
@@ -268,7 +268,7 @@ def menu_topics(cats, part, prog, hints):
 
 def menu_exercises(cats, part, topic, prog, hints):
     while True:
-        header(prog, cats)
+        header(prog, cats, compact=True)
         print(f"  {BOLD}{label(topic)} — {t('menu.exercises')}{RST}\n")
         exs = cats[part][topic]
         for i, e in enumerate(exs, 1):

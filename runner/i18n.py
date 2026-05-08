@@ -3,7 +3,7 @@ import locale
 import os
 from pathlib import Path
 
-from runner import BOLD, CY, RST
+from runner import BOLD, DIM, CY, W, Y, RST
 
 _LANG: str = 'pt_BR'
 _TRANSLATIONS: dict = {}
@@ -49,17 +49,52 @@ def t(key: str, **kwargs) -> str:
 
 def get_banner() -> str:
     subtitle = t('banner.subtitle')
-    inner = f"    CODELINGS  -  {subtitle}"
-    padded = inner.ljust(50)
-    return (
-        f"\n{BOLD}{CY}"
-        "  ╔══════════════════════════════════════════════════╗\n"
-        "  ║                                                  ║\n"
-        f"  ║{padded}║\n"
-        "  ║                                                  ║\n"
-        "  ╚══════════════════════════════════════════════════╝\n"
-        f"{RST}"
+    slogan = t('banner.slogan')
+
+    logo = [
+        r"  ____          _      _ _               ",
+        r" / ___|___   __| | ___| (_)_ __   __ _ ___",
+        r"| |   / _ \ / _` |/ _ \ | | '_ \/ _` / __|",
+        r"| |__| (_) | (_| |  __/ | | | | | (_| \__ " + "\\",
+        r" \____\___/ \__,_|\___|_|_|_| |_|\__, |___/",
+        r"                                  |___/    ",
+    ]
+
+    pad = 3
+    inner = max(
+        max(len(l) for l in logo) + pad * 2,
+        len(slogan) + pad * 2,
+        len(subtitle) + pad * 2,
     )
+
+    cb = f'{BOLD}{CY}'
+
+    def fence(left, right):
+        return f'{cb}{left}{"═" * inner}{right}{RST}'
+
+    def row(text, center=False, fg=''):
+        s = text.center(inner) if center else (' ' * pad + text).ljust(inner)
+        return f'{cb}║{RST}{fg}{s}{cb}║{RST}'
+
+    blank = f'{cb}║{" " * inner}║{RST}'
+
+    parts = [
+        '',
+        fence('╔', '╗'),
+        blank,
+        *[row(l, fg=f'{BOLD}{W}') for l in logo],
+        blank,
+        fence('╠', '╣'),
+        row(slogan, center=True, fg=f'{BOLD}{Y}'),
+        row(subtitle, center=True, fg=f'{DIM}{W}'),
+        fence('╚', '╝'),
+        '',
+    ]
+    return '\n'.join('  ' + p for p in parts)
+
+
+def get_compact_banner() -> str:
+    return f"\n  {BOLD}{CY}CODELINGS{RST}  {DIM}{'─' * 51}{RST}\n"
 
 
 def setup_i18n(lang: str) -> None:
