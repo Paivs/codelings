@@ -76,14 +76,17 @@ _TERMINAL_EDITORS = {'vim', 'vi', 'nvim', 'nano', 'emacs', 'pico', 'micro', 'hx'
 
 def _open_in_editor(editor: str, path) -> None:
     base = os.path.basename(editor).lower()
+    shell = sys.platform == 'win32'
     if base in _TERMINAL_EDITORS:
         subprocess.call([editor, str(path)])
     elif base in {'code', 'code-insiders'}:
         subprocess.Popen([editor, '--reuse-window', str(path)],
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         shell=shell)
     else:
         subprocess.Popen([editor, str(path)],
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         shell=shell)
 
 
 def clr():
