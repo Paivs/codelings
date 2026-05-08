@@ -112,7 +112,7 @@ Depois de configurado, use a opção `S` no menu principal para sincronizar a qu
 Use o CLI interativo:
 
 ```bash
-python novo_exercicio.py
+python runner/novo_exercicio.py
 ```
 
 O assistente guia você por linguagem, categoria, tipo, título e conteúdo — e abre o `$EDITOR` com o template já preenchido.

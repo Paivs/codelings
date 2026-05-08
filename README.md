@@ -112,7 +112,7 @@ Once configured, use the `S` option in the main menu to sync at any time.
 Use the interactive CLI:
 
 ```bash
-python novo_exercicio.py
+python runner/novo_exercicio.py
 ```
 
 The wizard guides you through language, category, type, title and content — and opens `$EDITOR` with the template already filled in.
