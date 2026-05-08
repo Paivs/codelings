@@ -4,6 +4,7 @@
 
 import argparse
 import os
+import subprocess
 import sys
 import time
 
@@ -68,6 +69,21 @@ else:
         def __exit__(self, *_):
             if sys.stdin.isatty():
                 termios.tcsetattr(self._fd, termios.TCSADRAIN, self._old)
+
+
+_TERMINAL_EDITORS = {'vim', 'vi', 'nvim', 'nano', 'emacs', 'pico', 'micro', 'hx', 'helix'}
+
+
+def _open_in_editor(editor: str, path) -> None:
+    base = os.path.basename(editor).lower()
+    if base in _TERMINAL_EDITORS:
+        subprocess.call([editor, str(path)])
+    elif base in {'code', 'code-insiders'}:
+        subprocess.Popen([editor, '--reuse-window', str(path)],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    else:
+        subprocess.Popen([editor, str(path)],
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 def clr():
@@ -166,6 +182,8 @@ def watch(ex, prog, hints):
                     if key == 'h' and last_result is not None and last_result.returncode != 0:
                         show_hint = True
                         show_result(ex, last_result, prog, hints, show_hint)
+                    elif key == 'e':
+                        _open_in_editor(_load_config().get('editor', 'code'), path)
 
                 try:
                     mtime = path.stat().st_mtime
@@ -297,12 +315,18 @@ def main():
     parser.add_argument('--sync',   action='store_true', help='Sync exercises from remote repository')
     parser.add_argument('--lang',   metavar='LANG',   default=None,
                         help='Set interface language (en, pt_BR, es, fr)')
+    parser.add_argument('--editor', metavar='EDITOR', default=None,
+                        help='Set default editor (code, vim, nano, ...)')
     args, _ = parser.parse_known_args()
 
     cfg = _load_config()
 
     if args.lang:
         cfg['lang'] = args.lang
+        _save_config(cfg)
+
+    if args.editor:
+        cfg['editor'] = args.editor
         _save_config(cfg)
 
     setup_i18n(_detect_lang(cfg))

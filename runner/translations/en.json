@@ -25,8 +25,8 @@
   "result.file": "File   ",
   "result.hint_label": "Hint:",
   "result.doc_label": "Doc:  ",
-  "result.keys_hint": "Keys    : [H] show hint   |   Ctrl+C back to menu",
-  "result.keys_no_hint": "Keys    : Ctrl+C back to menu",
+  "result.keys_hint": "Keys    : [H] hint   [E] editor   |   Ctrl+C back to menu",
+  "result.keys_no_hint": "Keys    : [E] editor   |   Ctrl+C back to menu",
 
   "sync.no_remote": "No remote repository configured.",
   "sync.use_remote": "Use: python codelings.py --remote <URL>",

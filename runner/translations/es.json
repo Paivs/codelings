@@ -25,8 +25,8 @@
   "result.file": "Archivo",
   "result.hint_label": "Pista:",
   "result.doc_label": "Doc:  ",
-  "result.keys_hint": "Teclas  : [H] mostrar pista   |   Ctrl+C volver al menú",
-  "result.keys_no_hint": "Teclas  : Ctrl+C volver al menú",
+  "result.keys_hint": "Teclas  : [H] pista   [E] editor   |   Ctrl+C volver al menú",
+  "result.keys_no_hint": "Teclas  : [E] editor   |   Ctrl+C volver al menú",
 
   "sync.no_remote": "No hay repositorio remoto configurado.",
   "sync.use_remote": "Usa: python codelings.py --remote <URL>",
