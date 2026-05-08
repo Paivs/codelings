@@ -2,112 +2,148 @@
 
 <img width="610" height="343" alt="image" src="https://github.com/user-attachments/assets/6ac6b1ae-d02e-4061-9f48-47c16883f188" />
 
+Learn programming by fixing bugs and completing code — inspired by [Rustlings](https://github.com/rust-lang/rustlings).
 
-Aprenda programação corrigindo erros e completando trechos de código — inspirado no [Rustlings](https://github.com/rust-lang/rustlings).
+Works with any language: just have the runtime installed.
 
-Funciona com qualquer linguagem: basta ter o runtime instalado.
+> **Português?** Veja o [README em português](README.pt.md).
 
-## Linguagens suportadas
+---
 
-| Linguagem  | Extensão | Runtime necessário |
-|------------|----------|--------------------|
-| Python     | `.py`    | `python3`          |
-| JavaScript | `.js`    | `node`             |
-| TypeScript | `.ts`    | `deno`             |
-| Go         | `.go`    | `go`               |
-| Rust       | `.rs`    | `rustc`            |
-| Ruby       | `.rb`    | `ruby`             |
-| Lua        | `.lua`   | `lua`              |
-| C          | `.c`     | `gcc`              |
-| Java       | `.java`  | `javac` + `java`   |
+## Supported Languages
 
-## Requisitos
+| Language   | Extension | Required runtime  |
+|------------|-----------|-------------------|
+| Python     | `.py`     | `python3`         |
+| JavaScript | `.js`     | `node`            |
+| TypeScript | `.ts`     | `deno`            |
+| Go         | `.go`     | `go`              |
+| Rust       | `.rs`     | `rustc`           |
+| Ruby       | `.rb`     | `ruby`            |
+| Lua        | `.lua`    | `lua`             |
+| C          | `.c`      | `gcc`             |
+| Java       | `.java`   | `javac` + `java`  |
 
-- Python 3.8 ou superior (apenas para rodar o motor)
-- O runtime da linguagem que você quer praticar
+## Requirements
 
-## Como iniciar
+- Python 3.8 or higher (only to run the engine)
+- The runtime for the language you want to practice
+
+## Getting Started
 
 ```bash
 python codelings.py
 ```
 
-No Windows, clique duas vezes em `start.bat`.  
-No Linux/macOS, você pode usar `start.sh` ou executar diretamente.
+On **Windows**, double-click `start.windows.bat`.  
+On **Linux/macOS**, run `start.linux.sh` or execute directly.
 
-## Como funciona
+## How It Works
 
-1. O menu lista as partes e os tópicos disponíveis
-2. Selecione um exercício pelo número
-3. Abra o arquivo indicado no seu editor preferido
-4. Salve o arquivo — o resultado aparece automaticamente na tela
-5. Interprete o erro, corrija o código, salve novamente
-6. Repita até o exercício passar
-7. `[H]` para exibir a dica quando houver erro
-8. `Ctrl+C` para voltar ao menu a qualquer momento
+1. The menu lists available sections and topics
+2. Select an exercise by number
+3. Open the indicated file in your editor
+4. Save the file — the result appears automatically on screen
+5. Read the error, fix the code, save again
+6. Repeat until the exercise passes
+7. Press `[H]` to show the hint when there's an error
+8. `Ctrl+C` to go back to the menu at any time
 
-O progresso é salvo automaticamente em `.progress.json`.
+Progress is saved automatically in `.progress.json`.
 
-## Tipos de exercício
+## Exercise Types
 
 ### FIX
 
-O arquivo já contém código com um bug intencional. O objetivo é encontrar e corrigir o erro.
+The file already contains code with an intentional bug. The goal is to find and fix the error.
 
 ```python
-# TITULO: Variaveis - Erro de Digitacao
-# TIPO: fix
-# ID: 001
+# title: Variables - Typo
+# type: fix
+# id: 001
 
-nome   = "Ana"
-iddade = 22          # <- revise esta linha
-print(f"Idade: {idade}")
+name   = "Ana"
+agge   = 22          # <- review this line
+print(f"Age: {age}")
 ```
 
 ### TODO
 
-O arquivo contém código parcialmente implementado. O objetivo é preencher os trechos que faltam.
+The file contains partially implemented code. The goal is to fill in the missing parts.
 
 ```javascript
-// TITULO: Funcoes - Somar
-// TIPO: todo
-// ID: 042
+// title: Functions - Sum
+// type: todo
+// id: 042
 
-function somar(a, b) {
-    // TAREFA: implemente aqui.
+function sum(a, b) {
+    // TODO: implement here.
 }
 ```
 
-Cada exercício TODO termina com uma seção de testes que verifica se a implementação está correta.
+Each TODO exercise ends with a test section that verifies the implementation is correct.
 
-## Adicionando exercícios
+## Interface Language
 
-Use o CLI interativo:
+Codelings auto-detects your system locale. You can override it with `--lang`:
+
+```bash
+python codelings.py --lang en     # English
+python codelings.py --lang pt_BR  # Portuguese
+python codelings.py --lang es     # Spanish
+python codelings.py --lang fr     # French
+```
+
+The chosen language is saved to `config.json` and persists across runs.
+
+## Remote Exercises
+
+You can sync exercises from a GitHub repository:
+
+```bash
+python codelings.py --remote https://github.com/user/repo
+python codelings.py --sync
+```
+
+Once configured, use the `S` option in the main menu to sync at any time.
+
+## Adding Exercises
+
+Use the interactive CLI:
 
 ```bash
 python novo_exercicio.py
 ```
 
-O assistente guia você por linguagem, categoria, tipo, título e conteúdo — e abre o `$EDITOR` com o template já preenchido.
+The wizard guides you through language, category, type, title and content — and opens `$EDITOR` with the template already filled in.
 
-Ou crie manualmente um arquivo dentro de `exercicios/<categoria>/<topico>/` seguindo o formato de cabeçalho (comentário na sintaxe da linguagem):
+Or create a file manually inside `exercises/<category>/<topic>/` following the header format (comment in the language syntax):
 
 ```
-TITULO: Nome do Exercício
-TIPO: fix   (ou: todo)
-ID: 042
+title: Exercise Name
+type: fix   (or: todo)
+id: 042
 ```
 
-O sistema descobre exercícios automaticamente pela estrutura de pastas.
+The engine discovers exercises automatically from the folder structure.
 
-## Estrutura de pastas
+## Project Structure
 
 ```
 codelings/
-├── codelings.py          ← motor principal
-├── novo_exercicio.py     ← CLI para criar exercícios
-├── hints.json            ← dicas por arquivo
-└── exercicios/
+├── codelings.py           ← entry point (menus, UI)
+├── novo_exercicio.py      ← CLI to create exercises
+├── runner/
+│   ├── runners.py         ← exercise execution engine
+│   ├── sync.py            ← remote sync
+│   ├── i18n.py            ← internationalization
+│   ├── hints.json         ← hints per exercise
+│   └── translations/
+│       ├── en.json
+│       ├── pt_BR.json
+│       ├── es.json
+│       └── fr.json
+└── exercises/
     ├── conceitual/
     │   ├── 01_variaveis/
     │   │   ├── var01_fix.py
@@ -119,27 +155,27 @@ codelings/
         └── ...
 ```
 
-## Adicionando suporte a uma nova linguagem
+## Adding Support for a New Language
 
-Adicione uma entrada em `RUNNERS` no `codelings.py`:
+Add an entry to `RUNNERS` in `runner/runners.py`:
 
 ```python
-# Linguagem interpretada
+# Interpreted language
 ".kt": {"cmd": ["kotlinc-jvm", "-script", "{file}"]},
 
-# Linguagem compilada (usa {bin} para o executável)
+# Compiled language (uses {bin} for the executable)
 ".cpp": {"compile": ["g++", "{file}", "-o", "{bin}"],
          "run":     ["{bin}"]},
 
-# Linguagem compilada com diretório de saída (usa {tmpdir} e {class})
+# Compiled with output directory (uses {tmpdir} and {class})
 ".java": {"compile": ["javac", "-d", "{tmpdir}", "{file}"],
           "run":     ["java", "-ea", "-cp", "{tmpdir}", "Exercicio"]},
 ```
 
-E adicione o template correspondente em `novo_exercicio.py` nos dicionários `LINGUAGENS`, `DOC_PADRAO`, `_CORPO` e `_TESTES`.
+Also add the corresponding template in `novo_exercicio.py` in the `LINGUAGENS`, `DOC_PADRAO`, `_CORPO` and `_TESTES` dicts.
 
-Veja [CONTRIBUTING.md](CONTRIBUTING.md) para o guia completo de contribuição.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution guide.
 
-## Licença
+## License
 
-Distribuído sob a [GNU GPL v3](LICENSE).
+Distributed under the [GNU GPL v3](LICENSE).

@@ -12,7 +12,7 @@
 # =================================================================
 
 nome   = "Ana"
-idade = 22
+iddade = 22
 cidade = "Recife"
 
 print(f"Nome  : {nome}")

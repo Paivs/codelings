@@ -19,9 +19,10 @@
 #   - String vazia e considerada palindromo
 # =================================================================
 
+
 def eh_palindromo(texto):
     # TAREFA: Normalize o texto (minusculo, sem espacos) e verifique
-    # se ele e igual ao seu reverso. Use fatiamento [::-1] para inverter.
+    # se ele e igual ao seu reverso.
     pass
 
 # =================================================================

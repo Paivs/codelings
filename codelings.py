@@ -1,61 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Codelings - Aprenda programação corrigindo e completando exercícios."""
+"""Codelings — Learn programming by fixing and completing exercises."""
 
+import argparse
 import os
 import sys
 import time
-import subprocess
-import json
-import tempfile
-from pathlib import Path
 
-BASE = Path(__file__).parent
+from runner import R, G, Y, B, CY, W, BOLD, DIM, RST
+from runner.i18n import t, get_banner, setup_i18n, _detect_lang
+from runner.runners import run_ex, discover, load_hints, load_progress, save_progress, DOC_PADRAO
+from runner.sync import sync_from_remote, _load_config, _save_config, _parse_github_url
+from runner.animations import play_random
 
-# ── Runners por extensão ───────────────────────────────────────────────────────
+SEP = CY + BOLD + '─' * 62 + RST
 
-_PY = "python" if sys.platform == "win32" else "python3"
-
-RUNNERS = {
-    ".py":  {"cmd":     [_PY,  "{file}"]},
-    ".js":  {"cmd":     ["node",     "{file}"]},
-    ".ts":  {"cmd":     ["deno",     "run", "--allow-all", "{file}"]},
-    ".go":  {"cmd":     ["go",       "run", "{file}"]},
-    ".rb":  {"cmd":     ["ruby",     "{file}"]},
-    ".lua": {"cmd":     ["lua",      "{file}"]},
-    ".rs":   {"compile": ["rustc",  "{file}", "-o", "{bin}"],
-              "run":     ["{bin}"]},
-    ".c":    {"compile": ["gcc",    "{file}", "-o", "{bin}"],
-              "run":     ["{bin}"]},
-    ".java": {"compile": ["javac",  "-d", "{tmpdir}", "{file}"],
-              "run":     ["java",   "-ea", "-cp", "{tmpdir}", "Exercicio"]},
-}
-
-DOC_PADRAO = {
-    ".py":  "https://docs.python.org/3/",
-    ".js":  "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript",
-    ".ts":  "https://www.typescriptlang.org/docs/",
-    ".go":  "https://go.dev/doc/",
-    ".rs":  "https://doc.rust-lang.org/book/",
-    ".rb":  "https://ruby-doc.org/",
-    ".lua": "https://www.lua.org/manual/5.4/",
-    ".c":    "https://en.cppreference.com/w/c",
-    ".java": "https://dev.java/learn/",
-}
-
-LANG_LABEL = {
-    ".py":  "Python",
-    ".js":  "JavaScript",
-    ".ts":  "TypeScript",
-    ".go":  "Go",
-    ".rb":  "Ruby",
-    ".lua": "Lua",
-    ".rs":  "Rust",
-    ".c":    "C",
-    ".java": "Java",
-}
-
-# ── Compatibilidade de terminal (Windows / Linux / macOS) ─────────────────────
+# ── Terminal compatibility (Windows / Linux / macOS) ──────────────────────────
 
 if sys.platform == 'win32':
     import msvcrt
@@ -109,173 +69,23 @@ else:
             if sys.stdin.isatty():
                 termios.tcsetattr(self._fd, termios.TCSADRAIN, self._old)
 
-# ── Cores ──────────────────────────────────────────────────────────────────────
-
-R    = '\033[91m'
-G    = '\033[92m'
-Y    = '\033[93m'
-B    = '\033[94m'
-CY   = '\033[96m'
-W    = '\033[97m'
-BOLD = '\033[1m'
-DIM  = '\033[2m'
-RST  = '\033[0m'
-
-PROGRESS_FILE = BASE / '.progress.json'
-HINTS_FILE    = BASE / 'hints.json'
-SEP = CY + BOLD + '─' * 62 + RST
-
-BANNER = (
-    f"\n{BOLD}{CY}"
-    "  ╔══════════════════════════════════════════════════╗\n"
-    "  ║                                                  ║\n"
-    "  ║    CODELINGS  -  Aprenda Programando!            ║\n"
-    "  ║                                                  ║\n"
-    "  ╚══════════════════════════════════════════════════╝\n"
-    f"{RST}"
-)
-
 
 def clr():
     os.system('cls' if sys.platform == 'win32' else 'clear')
 
 
-def load_progress():
-    try:
-        return json.loads(PROGRESS_FILE.read_text(encoding='utf-8'))
-    except Exception:
-        return {}
+def label(name: str) -> str:
+    return (name.split('_', 1)[1] if '_' in name else name).replace('_', ' ').title()
 
 
-def save_progress(p):
-    PROGRESS_FILE.write_text(json.dumps(p, indent=2), encoding='utf-8')
-
-
-def load_hints():
-    try:
-        return json.loads(HINTS_FILE.read_text(encoding='utf-8'))
-    except Exception:
-        return {}
-
-
-_KEY = {'titulo': 'title', 'tipo': 'type', 'descricao': 'description',
-        'title': 'title', 'type': 'type', 'description': 'description'}
-
-
-def read_meta(path):
-    m = {'title': path.stem, 'type': 'fix', 'description': '', 'id': '???'}
-    comment_chars = ('#', '//', '--')
-    try:
-        with open(path, encoding='utf-8') as f:
-            for line in f:
-                s = line.strip()
-                stripped = s
-                for cc in comment_chars:
-                    if stripped.startswith(cc):
-                        stripped = stripped[len(cc):].strip()
-                        break
-                else:
-                    break  # não é linha de comentário
-                if ':' not in stripped:
-                    continue
-                k, _, v = stripped.partition(':')
-                k = _KEY.get(k.strip().lower(), k.strip().lower())
-                v = v.strip()
-                if k in m:
-                    m[k] = v.lower() if k == 'type' else v
-    except Exception:
-        pass
-    return m
-
-
-def discover():
-    root = BASE / 'exercicios'
-    exts = set(RUNNERS.keys())
-    cats = {}
-    if not root.exists():
-        return cats
-    for part in sorted(root.iterdir()):
-        if not part.is_dir():
-            continue
-        cats[part.name] = {}
-        for topic in sorted(part.iterdir()):
-            if not topic.is_dir():
-                continue
-            exs = [
-                {
-                    'path': f,
-                    'key':  str(f.relative_to(BASE)).replace('\\', '/'),
-                    'meta': read_meta(f),
-                    'lang': LANG_LABEL.get(f.suffix.lower(), f.suffix[1:].upper()),
-                }
-                for f in sorted(topic.iterdir())
-                if f.is_file() and f.suffix.lower() in exts
-            ]
-            if exs:
-                cats[part.name][topic.name] = exs
-    return cats
-
-
-def _run_cmd(cmd, cwd):
-    env = {**os.environ, 'PYTHONIOENCODING': 'utf-8', 'PYTHONUTF8': '1'}
-    try:
-        return subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=15,
-            encoding='utf-8',
-            errors='replace',
-            cwd=str(cwd),
-            env=env,
-        )
-    except subprocess.TimeoutExpired:
-        class _T:
-            returncode = 1; stdout = ''; stderr = 'Tempo limite excedido (15s). Verifique se há loops infinitos.'
-        return _T()
-    except FileNotFoundError:
-        prog = cmd[0]
-        class _M:
-            returncode = 1; stdout = ''
-            stderr = f'Runtime não encontrado: "{prog}". Instale-o e tente novamente.'
-        return _M()
-    except Exception as exc:
-        class _E:
-            returncode = 1; stdout = ''; stderr = str(exc)
-        return _E()
-
-
-def run_ex(path):
-    ext = path.suffix.lower()
-    runner = RUNNERS.get(ext)
-    if not runner:
-        class _U:
-            returncode = 1; stdout = ''; stderr = f'Extensão não suportada: {ext}'
-        return _U()
-
-    if 'cmd' in runner:
-        cmd = [c.replace('{file}', str(path)) for c in runner['cmd']]
-        return _run_cmd(cmd, cwd=path.parent)
-
-    # Linguagem compilada: compile → execute
-    bin_name = path.stem + ('.exe' if sys.platform == 'win32' else '')
-    with tempfile.TemporaryDirectory() as tmpdir:
-        bin_path = Path(tmpdir) / bin_name
-
-        def expand(s):
-            return (s.replace('{file}',   str(path))
-                     .replace('{bin}',    str(bin_path))
-                     .replace('{tmpdir}', tmpdir)
-                     .replace('{class}',  path.stem))
-
-        r = _run_cmd([expand(c) for c in runner['compile']], cwd=path.parent)
-        if r.returncode != 0:
-            return r
-        return _run_cmd([expand(c) for c in runner['run']], cwd=path.parent)
+def _medalha(pct: float) -> str:
+    if pct >= 1.0:  return '🥇'
+    if pct >= 0.75: return '🥈'
+    if pct >= 0.5:  return '🥉'
+    return '  '
 
 
 def _parse_hint(raw) -> tuple[str, str]:
-    """Suporta formato string legado e dict {dica, doc}."""
     if isinstance(raw, dict):
         return raw.get('dica', ''), raw.get('doc', '')
     return str(raw) if raw else '', ''
@@ -296,43 +106,43 @@ def show_result(ex, result, prog, hints, show_hint=False):
 
     print(f"\n{SEP}")
     print(f"{BOLD}  #{m['id']}  {m['title']}{RST}")
-    print(f"  Tipo: {tc}{BOLD}{tl}{RST}  |  {CY}{lang}{RST}  |  {DIM}{ex['path'].name}{RST}")
+    print(f"  {t('result.type_label')}: {tc}{BOLD}{tl}{RST}  |  {CY}{lang}{RST}  |  {DIM}{ex['path'].name}{RST}")
     if m['description']:
         print(f"\n  {m['description']}")
     print(SEP + '\n')
 
     if ok:
-        print(f"  {G}{BOLD}[OK] Exercício concluído!{RST}\n")
+        print(f"  {G}{BOLD}{t('result.ok')}{RST}\n")
         prog[ex['key']] = True
         save_progress(prog)
     else:
-        print(f"  {R}{BOLD}[ERRO] Há problemas no exercício{RST}\n")
+        print(f"  {R}{BOLD}{t('result.error')}{RST}\n")
 
     if result.stdout:
-        print(f"{W}--- saída ---{RST}")
+        print(f"{W}{t('result.stdout')}{RST}")
         for line in result.stdout.splitlines():
             print(f"  {line}")
         print()
 
     if not ok and result.stderr:
-        print(f"{R}--- erro ---{RST}")
+        print(f"{R}{t('result.stderr')}{RST}")
         for line in result.stderr.splitlines():
             print(f"  {R}{line}{RST}")
         print()
 
     if show_hint and tem_hint:
         if hint_text:
-            print(f"  {Y}{BOLD}Dica:{RST} {Y}{hint_text}{RST}")
+            print(f"  {Y}{BOLD}{t('result.hint_label')}{RST} {Y}{hint_text}{RST}")
         if hint_doc:
-            print(f"  {Y}{BOLD}Doc: {RST} {CY}{hint_doc}{RST}")
+            print(f"  {Y}{BOLD}{t('result.doc_label')}{RST} {CY}{hint_doc}{RST}")
         print()
 
     print(f"\n{DIM}{'─' * 62}")
-    print(f"  Arquivo : {ex['path']}")
+    print(f"  {t('result.file')} : {ex['path']}")
     if not ok and tem_hint and not show_hint:
-        print(f"  Teclas  : [H] mostrar dica   |   Ctrl+C voltar ao menu")
+        print(f"  {t('result.keys_hint')}")
     else:
-        print(f"  Teclas  : Ctrl+C voltar ao menu")
+        print(f"  {t('result.keys_no_hint')}")
     print(f"{'─' * 62}{RST}")
 
 
@@ -343,9 +153,9 @@ def watch(ex, prog, hints):
     show_hint   = False
 
     clr()
-    print(f"\n  {CY}Exercício selecionado: {BOLD}{path.name}{RST}")
-    print(f"  {DIM}Edite o arquivo e salve — o resultado aparece automaticamente.{RST}")
-    print(f"  {DIM}Ctrl+C para voltar ao menu.{RST}\n")
+    print(f"\n  {CY}{t('watch.selected', name=path.name)}{RST}")
+    print(f"  {DIM}{t('watch.edit_hint')}{RST}")
+    print(f"  {DIM}{t('watch.ctrl_c')}{RST}\n")
     flush_keys()
 
     try:
@@ -368,56 +178,61 @@ def watch(ex, prog, hints):
                     show_hint   = False
                     last_result = run_ex(path)
                     show_result(ex, last_result, prog, hints, show_hint)
+                    if last_result.returncode == 0:
+                        play_random()
                     flush_keys()
 
                 time.sleep(0.1)
     except KeyboardInterrupt:
-        print(f"\n\n  {CY}Voltando ao menu...{RST}")
+        print(f"\n\n  {CY}{t('watch.returning')}{RST}")
         time.sleep(0.3)
-
-
-def label(name):
-    return (name.split('_', 1)[1] if '_' in name else name).replace('_', ' ').title()
-
-
-def _medalha(pct: float) -> str:
-    if pct >= 1.0: return '🥇'
-    if pct >= 0.75: return '🥈'
-    if pct >= 0.5: return '🥉'
-    return '  '
 
 
 def header(prog, cats):
     clr()
-    print(BANNER)
-    total  = sum(len(v) for p in cats.values() for v in p.values())
-    done   = sum(1 for v in prog.values() if v)
+    print(get_banner())
+    total      = sum(len(v) for p in cats.values() for v in p.values())
+    done       = sum(1 for v in prog.values() if v)
     pct        = done / max(total, 1)
     prob_total = sum(len(v) for v in cats.get('problemas', {}).values())
-    prob_done  = sum(1 for t in cats.get('problemas', {}).values()
-                     for e in t if prog.get(e['key']))
+    prob_done  = sum(1 for topic_exs in cats.get('problemas', {}).values()
+                     for e in topic_exs if prog.get(e['key']))
     prob_pct   = prob_done / max(prob_total, 1)
     score      = prob_done * 10
     n          = int(40 * pct)
     bar        = G + '#' * n + DIM + '-' * (40 - n) + RST
     medalha    = _medalha(prob_pct)
-    print(f"  Progresso: [{bar}] {BOLD}{done}/{total}{RST}  {medalha}  {CY}{BOLD}{score} pts{RST}\n")
+    print(f"  {t('progress.label')}: [{bar}] {BOLD}{done}/{total}{RST}  {medalha}  {CY}{BOLD}{score} pts{RST}\n")
 
 
 def menu_parts(cats, prog, hints):
     while True:
         header(prog, cats)
-        parts = list(cats.keys())
-        print(f"  {BOLD}Selecione uma parte:{RST}\n")
+        cfg    = _load_config()
+        remote = cfg.get('remote_url', '')
+        parts  = list(cats.keys())
+        print(f"  {BOLD}{t('menu.select_part')}{RST}\n")
         for i, p in enumerate(parts, 1):
-            t   = sum(len(v) for v in cats[p].values())
-            d   = sum(1 for topic in cats[p].values() for e in topic if prog.get(e['key']))
-            col = G if d == t else Y
-            print(f"    {BOLD}{i}.{RST}  {label(p):<32} ({col}{d}/{t}{RST})")
-        print(f"\n    {DIM}0.  Sair{RST}\n")
-        c = input(f"  {CY}> {RST}").strip()
+            tt  = sum(len(v) for v in cats[p].values())
+            d   = sum(1 for topic_exs in cats[p].values() for e in topic_exs if prog.get(e['key']))
+            col = G if d == tt else Y
+            print(f"    {BOLD}{i}.{RST}  {label(p):<32} ({col}{d}/{tt}{RST})")
+        if remote:
+            try:
+                owner, repo = _parse_github_url(remote)
+                remote_label = f"{owner}/{repo}"
+            except ValueError:
+                remote_label = remote
+            print(f"\n    {CY}S.  {t('menu.sync')}  {DIM}({remote_label}){RST}")
+        print(f"\n    {DIM}0.  {t('menu.exit')}{RST}\n")
+        c = input(f"  {CY}> {RST}").strip().lower()
         if c == '0':
             return
+        if c == 's' and remote:
+            sync_from_remote(cfg)
+            cats  = discover()
+            hints = load_hints()
+            continue
         try:
             idx = int(c) - 1
             if 0 <= idx < len(parts):
@@ -430,15 +245,15 @@ def menu_parts(cats, prog, hints):
 def menu_topics(cats, part, prog, hints):
     while True:
         header(prog, cats)
-        print(f"  {BOLD}{label(part)} — Tópicos:{RST}\n")
+        print(f"  {BOLD}{label(part)} — {t('menu.topics')}{RST}\n")
         topics = list(cats[part].keys())
-        for i, t in enumerate(topics, 1):
-            exs = cats[part][t]
+        for i, topic in enumerate(topics, 1):
+            exs = cats[part][topic]
             d   = sum(1 for e in exs if prog.get(e['key']))
             n   = len(exs)
             col = G if d == n else Y
-            print(f"    {BOLD}{i}.{RST}  {label(t):<32} [{col}{d}/{n}{RST}]")
-        print(f"\n    {DIM}0.  Voltar{RST}\n")
+            print(f"    {BOLD}{i}.{RST}  {label(topic):<32} [{col}{d}/{n}{RST}]")
+        print(f"\n    {DIM}0.  {t('menu.back')}{RST}\n")
         c = input(f"  {CY}> {RST}").strip()
         if c == '0':
             return None
@@ -454,7 +269,7 @@ def menu_topics(cats, part, prog, hints):
 def menu_exercises(cats, part, topic, prog, hints):
     while True:
         header(prog, cats)
-        print(f"  {BOLD}{label(topic)} — Exercícios:{RST}\n")
+        print(f"  {BOLD}{label(topic)} — {t('menu.exercises')}{RST}\n")
         exs = cats[part][topic]
         for i, e in enumerate(exs, 1):
             m    = e['meta']
@@ -463,7 +278,7 @@ def menu_exercises(cats, part, topic, prog, hints):
             tl   = 'FIX ' if m['type'] == 'fix' else 'TODO'
             st   = f"{G}[OK]{RST}" if prog.get(e['key']) else f"{DIM}[  ]{RST}"
             print(f"    {BOLD}{i}.{RST}  {st} {tc}[{tl}]{RST} {CY}[{lang}]{RST}  {DIM}#{m['id']}{RST}  {m['title']}")
-        print(f"\n    {DIM}0.  Voltar{RST}\n")
+        print(f"\n    {DIM}0.  {t('menu.back')}{RST}\n")
         c = input(f"  {CY}> {RST}").strip()
         if c == '0':
             return None
@@ -476,10 +291,39 @@ def menu_exercises(cats, part, topic, prog, hints):
 
 
 def main():
+    parser = argparse.ArgumentParser(prog='codelings', add_help=False)
+    parser.add_argument('--remote', metavar='URL',    help='Configure remote exercises repository')
+    parser.add_argument('--branch', metavar='BRANCH', default=None)
+    parser.add_argument('--sync',   action='store_true', help='Sync exercises from remote repository')
+    parser.add_argument('--lang',   metavar='LANG',   default=None,
+                        help='Set interface language (en, pt_BR, es, fr)')
+    args, _ = parser.parse_known_args()
+
+    cfg = _load_config()
+
+    if args.lang:
+        cfg['lang'] = args.lang
+        _save_config(cfg)
+
+    setup_i18n(_detect_lang(cfg))
+
+    if args.remote:
+        cfg['remote_url'] = args.remote
+        if args.branch:
+            cfg['branch'] = args.branch
+        _save_config(cfg)
+        print(f"\n  {G}{t('remote.configured', url=args.remote)}{RST}")
+        sync_from_remote(cfg)
+
+    elif args.sync:
+        ok = sync_from_remote(cfg)
+        if not ok:
+            sys.exit(1)
+
     cats = discover()
     if not cats:
-        print(f"{R}Nenhum exercício encontrado em ./exercicios/{RST}")
-        print("Certifique-se de que a pasta 'exercicios' existe com os exercícios.")
+        print(f"{R}{t('error.no_exercises')}{RST}")
+        print(t('error.configure_remote'))
         sys.exit(1)
     prog  = load_progress()
     hints = load_hints()
@@ -488,8 +332,8 @@ def main():
     except KeyboardInterrupt:
         pass
     clr()
-    print(BANNER)
-    print(f"  {G}{BOLD}Até logo! Continue praticando!{RST}\n")
+    print(get_banner())
+    print(f"  {G}{BOLD}{t('goodbye')}{RST}\n")
 
 
 if __name__ == '__main__':
