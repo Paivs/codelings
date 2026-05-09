@@ -6,24 +6,29 @@ Obrigado pelo interesse em contribuir! Este guia cobre as três formas principai
 
 ## Exercícios
 
+Os exercícios ficam em um repositório separado:  
+**[codelings-exercises-ptbr](https://github.com/Paivs/codelings-exercises-ptbr)**
+
+Para contribuir com exercícios, faça um fork desse repositório (não deste).
+
 ### Via CLI (recomendado)
 
 ```bash
-python novo_exercicio.py
+python runner/novo_exercicio.py
 ```
 
 O assistente guia você por linguagem, categoria, tipo, título e conteúdo — e abre o `$EDITOR` com o template já preenchido.
 
 ### Manualmente
 
-Crie um arquivo em `exercicios/<categoria>/<NN_topico>/` seguindo o formato abaixo. Use o caractere de comentário da linguagem (`#`, `//` ou `--`).
+Crie um arquivo em `exercises/<categoria>/<NN_topico>/` seguindo o formato abaixo. Use o caractere de comentário da linguagem (`#`, `//` ou `--`).
 
 #### Exercício FIX
 
 ```python
-# TITULO: Variaveis - Erro de Digitacao
-# TIPO: fix
-# ID: 032
+# titulo: Variaveis - Erro de Digitacao
+# tipo: fix
+# id: 032
 
 # =================================================================
 # ENUNCIADO
@@ -45,9 +50,9 @@ print("Exercicio concluido!")
 #### Exercício TODO
 
 ```javascript
-// TITULO: Funcoes - Somar
-// TIPO: todo
-// ID: 033
+// titulo: Funcoes - Somar
+// tipo: todo
+// id: 033
 
 // =================================================================
 // ENUNCIADO
@@ -73,52 +78,49 @@ console.log("Exercicio concluido!");
 
 ### Regras obrigatórias
 
-- Cabeçalho com `TITULO`, `TIPO` e `ID` (próximo ID disponível — verifique com `python -c "import codelings; print(max(int(l.split()[-1]) for f in __import__('pathlib').Path('exercicios').rglob('*') if f.is_file() for l in f.read_text().splitlines()[:8] if 'ID:' in l) + 1)"` ou via `novo_exercicio.py`)
+- Cabeçalho com `titulo`, `tipo` e `id` (use `runner/novo_exercicio.py` para gerar o próximo ID automaticamente)
 - Exercícios de `problemas` são sempre `TODO` e um por tópico
 - Asserts com valores literais pré-calculados — nunca expressões que revelem a solução
 - Marque a linha com bug com `# <- revise esta linha` nos FIX
-- Adicione uma dica em `hints.json` (pode incluir link da documentação)
+- Adicione uma dica em `runner/hints.json` (pode incluir link da documentação)
 - O exercício deve **falhar** antes da correção e **passar** depois
-
-Consulte [AGENTS.md](AGENTS.md) para o guia completo de convenções.
 
 ---
 
 ## Nova linguagem
 
-### 1. Adicionar o runner em `codelings.py`
+### 1. Adicionar o runner em `runner/runners.py`
 
 ```python
 # Linguagem interpretada
-RUNNERS[".rb"] = {"cmd": ["ruby", "{file}"]}
+".rb": {"cmd": ["ruby", "{file}"]},
 
 # Linguagem compilada com binário
-RUNNERS[".rs"] = {
+".rs": {
     "compile": ["rustc", "{file}", "-o", "{bin}"],
     "run":     ["{bin}"],
-}
+},
 
 # Linguagem compilada com diretório de saída
-RUNNERS[".java"] = {
+".java": {
     "compile": ["javac", "-d", "{tmpdir}", "{file}"],
     "run":     ["java", "-ea", "-cp", "{tmpdir}", "Exercicio"],
-}
+},
 ```
 
 Placeholders disponíveis: `{file}`, `{bin}`, `{tmpdir}`, `{class}`.
 
-### 2. Adicionar label e doc em `codelings.py`
+### 2. Adicionar label e doc em `runner/runners.py`
 
 ```python
 LANG_LABEL[".rb"] = "Ruby"
-DOC_PADRAO[".rb"] = "https://ruby-doc.org/"
+DOC_PADRAO[".rb"]  = "https://ruby-doc.org/"
 ```
 
-### 3. Adicionar templates em `novo_exercicio.py`
+### 3. Adicionar templates em `runner/novo_exercicio.py`
 
 ```python
 LINGUAGENS["Ruby"] = {"ext": ".rb", "comment": "#", "compiled": False}
-DOC_PADRAO[".rb"]  = "https://ruby-doc.org/"
 
 _CORPO[".rb"] = {
     "fix":  "def minha_funcao(x)\n  x + 1  # <- revise esta linha\nend\n",
@@ -130,15 +132,46 @@ _TESTES[".rb"] = 'raise "caso 1 incorreto" unless minha_funcao(1) == 2\nputs "Ex
 
 ### 4. Testar
 
-Crie um exercício de teste com `python novo_exercicio.py`, resolva-o manualmente e confirme que passa no motor.
+Crie um exercício de teste com `python runner/novo_exercicio.py`, resolva-o manualmente e confirme que passa no motor.
 
 ---
 
-## Motor (`codelings.py`, `novo_exercicio.py`)
+## Motor
+
+Os arquivos do motor ficam em `runner/`:
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `runners.py` | Execução dos exercícios (RUNNERS, DOC_PADRAO, LANG_LABEL) |
+| `sync.py` | Orquestração do sync remoto |
+| `providers.py` | Providers GitHub / GitLab / Gitea |
+| `i18n.py` | Internacionalização e banner |
+| `animations/` | Animações ASCII easter eggs |
 
 - Abra uma issue descrevendo a mudança antes de implementar algo grande
 - PRs com alterações no motor devem incluir testes manuais documentados
 - Mantenha zero dependências externas — apenas stdlib Python
+
+### Adicionando um novo provider
+
+Implemente a classe em `runner/providers.py` herdando de `Provider`:
+
+```python
+class MeuProvider(Provider):
+    def _parse(self, url: str) -> tuple[str, str]:
+        # extrai owner e repo da URL
+        ...
+
+    def list_files(self) -> list[str]:
+        # retorna paths relativos dos arquivos de exercício
+        ...
+
+    def fetch_file(self, path: str) -> bytes:
+        # baixa e retorna o conteúdo de um arquivo
+        ...
+```
+
+Depois registre-o em `detect_provider()`.
 
 ---
 
@@ -157,7 +190,7 @@ Crie um exercício de teste com `python novo_exercicio.py`, resolva-o manualment
 Se um exercício foi modificado acidentalmente:
 
 ```bash
-python _gen_exercicios.py
+python runner/gen_exercicios.py
 ```
 
 O script consulta o repositório remoto, compara checksums e restaura apenas os arquivos que divergirem.

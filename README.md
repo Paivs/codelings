@@ -28,6 +28,7 @@ Works with any language: just have the runtime installed.
 
 - Python 3.8 or higher (only to run the engine)
 - The runtime for the language you want to practice
+- Internet connection on first run (to download exercises)
 
 ## Getting Started
 
@@ -35,6 +36,7 @@ Works with any language: just have the runtime installed.
 python codelings.py
 ```
 
+On first run, exercises are downloaded automatically from the default repository.  
 On **Windows**, double-click `start.windows.bat`.  
 On **Linux/macOS**, run `start.linux.sh` or execute directly.
 
@@ -47,7 +49,8 @@ On **Linux/macOS**, run `start.linux.sh` or execute directly.
 5. Read the error, fix the code, save again
 6. Repeat until the exercise passes
 7. Press `[H]` to show the hint when there's an error
-8. `Ctrl+C` to go back to the menu at any time
+8. Press `[E]` to open the file in your editor directly from the terminal
+9. `Ctrl+C` to go back to the menu at any time
 
 Progress is saved automatically in `.progress.json`.
 
@@ -96,16 +99,39 @@ python codelings.py --lang fr     # French
 
 The chosen language is saved to `config.json` and persists across runs.
 
+## Editor
+
+By default, `[E]` opens the current exercise in VS Code. To use a different editor:
+
+```bash
+python codelings.py --editor vim
+python codelings.py --editor nano
+python codelings.py --editor subl
+```
+
+The preference is saved to `config.json`.
+
 ## Remote Exercises
 
-You can sync exercises from a GitHub repository:
+Exercises are stored in a separate repository and downloaded automatically.  
+The default source is [codelings-exercises-ptbr](https://github.com/Paivs/codelings-exercises-ptbr).
+
+To use a different exercise repository:
 
 ```bash
 python codelings.py --remote https://github.com/user/repo
-python codelings.py --sync
+python codelings.py --remote https://gitlab.com/user/repo
+python codelings.py --remote https://git.yourcompany.com/user/repo
 ```
 
-Once configured, use the `S` option in the main menu to sync at any time.
+Supported providers: **GitHub**, **GitLab** (cloud and self-hosted), **Gitea / Forgejo** (self-hosted).  
+The provider is detected automatically from the URL.
+
+To sync at any time, use the `S` option in the main menu or:
+
+```bash
+python codelings.py --sync
+```
 
 ## Adding Exercises
 
@@ -127,31 +153,41 @@ id: 042
 
 The engine discovers exercises automatically from the folder structure.
 
+## Restoring Exercises
+
+If an exercise was accidentally modified:
+
+```bash
+python runner/gen_exercicios.py
+```
+
+The script fetches the remote version, compares checksums, and restores only the files that differ.
+
 ## Project Structure
 
 ```
 codelings/
-├── codelings.py           ← entry point (menus, UI)
-├── novo_exercicio.py      ← CLI to create exercises
+├── codelings.py               ← entry point (menus, UI)
 ├── runner/
-│   ├── runners.py         ← exercise execution engine
-│   ├── sync.py            ← remote sync
-│   ├── i18n.py            ← internationalization
-│   ├── hints.json         ← hints per exercise
+│   ├── __init__.py            ← ANSI constants, BASE path
+│   ├── runners.py             ← exercise execution engine
+│   ├── sync.py                ← remote sync orchestration
+│   ├── providers.py           ← GitHub / GitLab / Gitea providers
+│   ├── i18n.py                ← internationalization
+│   ├── hints.json             ← hints per exercise (downloaded)
+│   ├── novo_exercicio.py      ← CLI to create exercises
+│   ├── gen_exercicios.py      ← exercise restore tool
+│   ├── animations/            ← ASCII animation easter eggs
 │   └── translations/
 │       ├── en.json
 │       ├── pt_BR.json
 │       ├── es.json
 │       └── fr.json
-└── exercises/
+└── exercises/                 ← downloaded on first run (not versioned)
     ├── conceitual/
     │   ├── 01_variaveis/
-    │   │   ├── var01_fix.py
-    │   │   └── var02_todo.js
     │   └── ...
     └── problemas/
-        ├── 01_palindromo/
-        │   └── palindrome_todo.py
         └── ...
 ```
 
@@ -172,7 +208,7 @@ Add an entry to `RUNNERS` in `runner/runners.py`:
           "run":     ["java", "-ea", "-cp", "{tmpdir}", "Exercicio"]},
 ```
 
-Also add the corresponding template in `novo_exercicio.py` in the `LINGUAGENS`, `DOC_PADRAO`, `_CORPO` and `_TESTES` dicts.
+Also add the corresponding template in `runner/novo_exercicio.py` in the `LINGUAGENS`, `DOC_PADRAO`, `_CORPO` and `_TESTES` dicts.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution guide.
 
