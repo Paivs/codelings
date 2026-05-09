@@ -28,6 +28,7 @@
   "result.keys_hint": "Teclas  : [H] dica   [E] editor   |   Ctrl+C voltar ao menu",
   "result.keys_no_hint": "Teclas  : [E] editor   |   Ctrl+C voltar ao menu",
 
+  "sync.first_run": "Baixando exercícios de {remote}...",
   "sync.no_remote": "Nenhum repositório remoto configurado.",
   "sync.use_remote": "Use: python codelings.py --remote <URL>",
   "sync.syncing": "Sincronizando de {owner}/{repo} ({branch})...",

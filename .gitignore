@@ -1,4 +1,6 @@
-# Progresso do aluno (gerado automaticamente)
+# Exercícios e progresso (gerados/baixados localmente)
+exercises/
+runner/hints.json
 .progress.json
 
 # Claude Code

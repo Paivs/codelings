@@ -11,7 +11,7 @@ import time
 from runner import R, G, Y, B, CY, W, BOLD, DIM, RST
 from runner.i18n import t, get_banner, get_compact_banner, setup_i18n, _detect_lang
 from runner.runners import run_ex, discover, load_hints, load_progress, save_progress, DOC_PADRAO
-from runner.sync import sync_from_remote, _load_config, _save_config, _parse_github_url
+from runner.sync import sync_from_remote, _load_config, _save_config, _parse_github_url, DEFAULT_EXERCISES_REMOTE
 from runner.animations import play_random
 
 SEP = CY + BOLD + '─' * 62 + RST
@@ -348,6 +348,12 @@ def main():
             sys.exit(1)
 
     cats = discover()
+    if not cats:
+        clr()
+        print(get_banner())
+        print(f"  {CY}{t('sync.first_run', remote=DEFAULT_EXERCISES_REMOTE)}{RST}\n")
+        sync_from_remote(cfg)
+        cats = discover()
     if not cats:
         print(f"{R}{t('error.no_exercises')}{RST}")
         print(t('error.configure_remote'))

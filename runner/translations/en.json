@@ -28,6 +28,7 @@
   "result.keys_hint": "Keys    : [H] hint   [E] editor   |   Ctrl+C back to menu",
   "result.keys_no_hint": "Keys    : [E] editor   |   Ctrl+C back to menu",
 
+  "sync.first_run": "Downloading exercises from {remote}...",
   "sync.no_remote": "No remote repository configured.",
   "sync.use_remote": "Use: python codelings.py --remote <URL>",
   "sync.syncing": "Syncing from {owner}/{repo} ({branch})...",

@@ -28,6 +28,7 @@
   "result.keys_hint": "Touches : [H] indice   [E] éditeur   |   Ctrl+C revenir au menu",
   "result.keys_no_hint": "Touches : [E] éditeur   |   Ctrl+C revenir au menu",
 
+  "sync.first_run": "Téléchargement des exercices depuis {remote}...",
   "sync.no_remote": "Aucun dépôt distant configuré.",
   "sync.use_remote": "Utilisez : python codelings.py --remote <URL>",
   "sync.syncing": "Synchronisation depuis {owner}/{repo} ({branch})...",
