@@ -4,6 +4,7 @@ Cada provider sabe como listar e baixar arquivos de um serviço de hospedagem
 específico. A função `detect_provider` escolhe automaticamente pelo padrão da URL.
 """
 
+import base64
 import json
 import re
 import urllib.error
@@ -16,8 +17,8 @@ _HINTS_PATH = 'hints.json'
 _UA = {'User-Agent': 'codelings'}
 
 
-def _fetch(url: str, timeout: int = 15) -> bytes:
-    req = urllib.request.Request(url, headers=_UA)
+def _fetch(url: str, timeout: int = 15, headers: dict | None = None) -> bytes:
+    req = urllib.request.Request(url, headers={**_UA, **(headers or {})})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read()
 
@@ -44,6 +45,9 @@ class Provider:
     def label(self) -> str:
         return f"{self.owner}/{self.repo}"
 
+    def publish_file(self, path: str, content: bytes, message: str, token: str) -> None:
+        raise NotImplementedError
+
 
 class GithubProvider(Provider):
     def _parse(self, url: str) -> tuple[str, str]:
@@ -66,6 +70,35 @@ class GithubProvider(Provider):
     def fetch_file(self, path: str) -> bytes:
         url = f"https://raw.githubusercontent.com/{self.owner}/{self.repo}/{self.branch}/{path}"
         return _fetch(url)
+
+    def publish_file(self, path: str, content: bytes, message: str, token: str) -> None:
+        api = f"https://api.github.com/repos/{self.owner}/{self.repo}/contents/{path}"
+        auth = {'Authorization': f'token {token}', 'Accept': 'application/vnd.github.v3+json'}
+
+        sha = None
+        try:
+            data = json.loads(_fetch(api, headers=auth))
+            sha = data.get('sha')
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                raise
+
+        body: dict = {
+            'message': message,
+            'content': base64.b64encode(content).decode(),
+            'branch':  self.branch,
+        }
+        if sha:
+            body['sha'] = sha
+
+        req = urllib.request.Request(
+            api,
+            data=json.dumps(body).encode(),
+            headers={**_UA, **auth, 'Content-Type': 'application/json'},
+            method='PUT',
+        )
+        with urllib.request.urlopen(req, timeout=15) as r:
+            r.read()
 
 
 class GitlabProvider(Provider):

@@ -3,6 +3,9 @@ exercises/
 runner/hints.json
 .progress.json
 
+# Configuração local (pode conter tokens — nunca commitar)
+config.json
+
 # Claude Code
 .claude/
 

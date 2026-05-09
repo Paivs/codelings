@@ -71,6 +71,81 @@ else:
                 termios.tcsetattr(self._fd, termios.TCSADRAIN, self._old)
 
 
+def _read_menu_key() -> str:
+    """Blocking read for menus — returns 'UP', 'DOWN', or a character."""
+    if sys.platform == 'win32':
+        ch = msvcrt.getch()
+        if ch in (b'\x00', b'\xe0'):
+            ch2 = msvcrt.getch()
+            if ch2 == b'H': return 'UP'
+            if ch2 == b'P': return 'DOWN'
+            return ''
+        if ch == b'\x03': raise KeyboardInterrupt
+        try:
+            return ch.decode('utf-8')
+        except Exception:
+            return ''
+    else:
+        fd  = sys.stdin.fileno()
+        old = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            ch = os.read(fd, 1)
+            if ch == b'\x03': raise KeyboardInterrupt
+            if ch == b'\x1b':
+                if select.select([fd], [], [], 0.1)[0]:
+                    ch2 = os.read(fd, 1)
+                    if ch2 == b'[' and select.select([fd], [], [], 0.1)[0]:
+                        ch3 = os.read(fd, 1)
+                        if ch3 == b'A': return 'UP'
+                        if ch3 == b'B': return 'DOWN'
+                return 'ESC'
+            return ch.decode('utf-8', errors='ignore')
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+
+def _menu_select(items: list, default: int = 0, key_map: dict | None = None) -> int:
+    """Arrow-key selector. Returns index of chosen item.
+
+    key_map: extra {char: index} shortcuts (e.g. {'s': 3} for Sync).
+    Pressing '0' always maps to the last item (back/quit).
+    Pressing '1'..'9' jumps to that 1-based index if valid.
+    """
+    n      = len(items)
+    cursor = default % n
+    first  = True
+
+    while True:
+        if not first:
+            sys.stdout.write(f'\033[{n}A')
+        first = False
+
+        for i, item in enumerate(items):
+            sys.stdout.write('\r\033[K')
+            if i == cursor:
+                sys.stdout.write(f'  {CY}▸{RST} {item}\n')
+            else:
+                sys.stdout.write(f'    {item}\n')
+        sys.stdout.flush()
+
+        key = _read_menu_key()
+        if key == 'UP':
+            cursor = (cursor - 1) % n
+        elif key == 'DOWN':
+            cursor = (cursor + 1) % n
+        elif key in ('\r', '\n'):
+            return cursor
+        elif key == '0':
+            return n - 1
+        elif key.isdigit():
+            idx = int(key) - 1
+            if 0 <= idx < n:
+                return idx
+        elif key_map and key.lower() in key_map:
+            return key_map[key.lower()]
+
+
 _TERMINAL_EDITORS = {'vim', 'vi', 'nvim', 'nano', 'emacs', 'pico', 'micro', 'hx', 'helix'}
 
 
@@ -233,82 +308,86 @@ def menu_parts(cats, prog, hints):
         remote = cfg.get('remote_url', '')
         parts  = list(cats.keys())
         print(f"  {BOLD}{t('menu.select_part')}{RST}\n")
+
+        items  = []
+        values = []
         for i, p in enumerate(parts, 1):
             tt  = sum(len(v) for v in cats[p].values())
             d   = sum(1 for topic_exs in cats[p].values() for e in topic_exs if prog.get(e['key']))
             col = G if d == tt else Y
-            print(f"    {BOLD}{i}.{RST}  {label(p):<32} ({col}{d}/{tt}{RST})")
+            items.append(f"{BOLD}{i}.{RST}  {label(p):<32} ({col}{d}/{tt}{RST})")
+            values.append(('part', p))
+
+        key_map = {}
         if remote:
             try:
                 owner, repo = _parse_github_url(remote)
                 remote_label = f"{owner}/{repo}"
             except ValueError:
                 remote_label = remote
-            print(f"\n    {CY}S.  {t('menu.sync')}  {DIM}({remote_label}){RST}")
-        print(f"\n    {DIM}0.  {t('menu.exit')}{RST}\n")
-        c = input(f"  {CY}> {RST}").strip().lower()
-        if c == '0':
+            items.append(f"{CY}S.  {t('menu.sync')}  {DIM}({remote_label}){RST}")
+            values.append(('sync', None))
+            key_map['s'] = len(items) - 1
+
+        items.append(f"{DIM}0.  {t('menu.exit')}{RST}")
+        values.append(('quit', None))
+
+        idx            = _menu_select(items, key_map=key_map)
+        action, val    = values[idx]
+
+        if action == 'quit':
             return
-        if c == 's' and remote:
+        if action == 'sync':
             sync_from_remote(cfg)
             cats  = discover()
             hints = load_hints()
             continue
-        try:
-            idx = int(c) - 1
-            if 0 <= idx < len(parts):
-                if menu_topics(cats, parts[idx], prog, hints) == 'quit':
-                    return
-        except ValueError:
-            pass
+        if menu_topics(cats, val, prog, hints) == 'quit':
+            return
 
 
 def menu_topics(cats, part, prog, hints):
     while True:
         header(prog, cats, compact=True)
-        print(f"  {BOLD}{label(part)} — {t('menu.topics')}{RST}\n")
         topics = list(cats[part].keys())
+        print(f"  {BOLD}{label(part)} — {t('menu.topics')}{RST}\n")
+
+        items = []
         for i, topic in enumerate(topics, 1):
             exs = cats[part][topic]
             d   = sum(1 for e in exs if prog.get(e['key']))
             n   = len(exs)
             col = G if d == n else Y
-            print(f"    {BOLD}{i}.{RST}  {label(topic):<32} [{col}{d}/{n}{RST}]")
-        print(f"\n    {DIM}0.  {t('menu.back')}{RST}\n")
-        c = input(f"  {CY}> {RST}").strip()
-        if c == '0':
+            items.append(f"{BOLD}{i}.{RST}  {label(topic):<32} [{col}{d}/{n}{RST}]")
+        items.append(f"{DIM}0.  {t('menu.back')}{RST}")
+
+        idx = _menu_select(items)
+        if idx == len(items) - 1:
             return None
-        try:
-            idx = int(c) - 1
-            if 0 <= idx < len(topics):
-                if menu_exercises(cats, part, topics[idx], prog, hints) == 'quit':
-                    return 'quit'
-        except ValueError:
-            pass
+        if menu_exercises(cats, part, topics[idx], prog, hints) == 'quit':
+            return 'quit'
 
 
 def menu_exercises(cats, part, topic, prog, hints):
     while True:
         header(prog, cats, compact=True)
-        print(f"  {BOLD}{label(topic)} — {t('menu.exercises')}{RST}\n")
         exs = cats[part][topic]
+        print(f"  {BOLD}{label(topic)} — {t('menu.exercises')}{RST}\n")
+
+        items = []
         for i, e in enumerate(exs, 1):
             m    = e['meta']
             lang = e.get('lang', '')
             tc   = Y if m['type'] == 'fix' else B
             tl   = 'FIX ' if m['type'] == 'fix' else 'TODO'
             st   = f"{G}[OK]{RST}" if prog.get(e['key']) else f"{DIM}[  ]{RST}"
-            print(f"    {BOLD}{i}.{RST}  {st} {tc}[{tl}]{RST} {CY}[{lang}]{RST}  {DIM}#{m['id']}{RST}  {m['title']}")
-        print(f"\n    {DIM}0.  {t('menu.back')}{RST}\n")
-        c = input(f"  {CY}> {RST}").strip()
-        if c == '0':
+            items.append(f"{BOLD}{i}.{RST}  {st} {tc}[{tl}]{RST} {CY}[{lang}]{RST}  {DIM}#{m['id']}{RST}  {m['title']}")
+        items.append(f"{DIM}0.  {t('menu.back')}{RST}")
+
+        idx = _menu_select(items)
+        if idx == len(items) - 1:
             return None
-        try:
-            idx = int(c) - 1
-            if 0 <= idx < len(exs):
-                watch(exs[idx], prog, hints)
-        except ValueError:
-            pass
+        watch(exs[idx], prog, hints)
 
 
 def main():
