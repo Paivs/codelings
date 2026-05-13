@@ -19,6 +19,7 @@
 
   "result.ok": "[OK] Exercice terminé !",
   "result.error": "[ERREUR] Il y a des problèmes dans l'exercice",
+  "result.empty": "[ERREUR] Le fichier est vide — écrivez votre solution avant de continuer",
   "result.type_label": "Type",
   "result.stdout": "--- sortie ---",
   "result.stderr": "--- erreur ---",

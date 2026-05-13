@@ -19,6 +19,7 @@
 
   "result.ok": "[OK] Exercise complete!",
   "result.error": "[ERROR] There are issues in the exercise",
+  "result.empty": "[ERROR] The file is empty — write your solution before continuing",
   "result.type_label": "Type",
   "result.stdout": "--- output ---",
   "result.stderr": "--- error ---",

@@ -191,7 +191,8 @@ def show_result(ex, result, prog, hints, show_hint=False):
     lang = ex.get('lang', '')
     tc   = Y if m['type'] == 'fix' else B
     tl   = 'FIX' if m['type'] == 'fix' else 'TODO'
-    ok   = result.returncode == 0
+    file_empty = ex['path'].stat().st_size == 0
+    ok   = result.returncode == 0 and not file_empty
 
     hint_text, hint_doc = _parse_hint(hints.get(ex['key'], ''))
     if not hint_doc:
@@ -209,6 +210,8 @@ def show_result(ex, result, prog, hints, show_hint=False):
         print(f"  {G}{BOLD}{t('result.ok')}{RST}\n")
         prog[ex['key']] = True
         save_progress(prog)
+    elif file_empty:
+        print(f"  {R}{BOLD}{t('result.empty')}{RST}\n")
     else:
         print(f"  {R}{BOLD}{t('result.error')}{RST}\n")
 
